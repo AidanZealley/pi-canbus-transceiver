@@ -23,7 +23,7 @@ source venv/bin/activate
 
 # Install dependencies
 echo "Installing dependencies..."
-pip install python-can
+sudo pip install python-can
 
 # Run the Python receive script
 echo "Running tranceiver..."
