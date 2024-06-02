@@ -14,7 +14,7 @@ cd /pi-canbus-tranceiver
 # Check the virtual environment exists
 if [ ! -d "$VENV_PATH" ]; then
     echo "Creating virtual environment..."
-    sudo python -m venv "$VENV_NAME" || { echo "Failed to create virtual environment"; exit 1; }
+    python -m venv "$VENV_NAME" || { echo "Failed to create virtual environment"; exit 1; }
 fi
 
 # Activate the virtual environment
@@ -23,7 +23,7 @@ source venv/bin/activate
 
 # Install dependencies
 echo "Installing dependencies..."
-sudo pip install python-can
+pip install python-can
 
 # Run the Python receive script
 echo "Running tranceiver..."
