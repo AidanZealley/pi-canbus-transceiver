@@ -3,8 +3,8 @@ Description=Setup CAN interface and run CAN tranceiver script
 After=network.target
 
 [Service]
-ExecStart=/home/USERNAME/canbus/setup.sh
-WorkingDirectory=/home/USERNAME/canbus
+ExecStart=/home/USERNAME/pi-canbus-transceiver/setup.sh
+WorkingDirectory=/home/USERNAME/pi-canbus-transceiver
 StandardOutput=inherit
 StandardError=inherit
 Restart=always
