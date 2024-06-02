@@ -1,0 +1,14 @@
+[Unit]
+Description=Setup CAN interface and run CAN tranceiver script
+After=network.target
+
+[Service]
+ExecStart=/home/USERNAME/canbus/setup.sh
+WorkingDirectory=/home/USERNAME/canbus
+StandardOutput=inherit
+StandardError=inherit
+Restart=always
+User=USERNAME
+
+[Install]
+WantedBy=multi-user.target
