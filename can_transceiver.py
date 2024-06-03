@@ -3,7 +3,7 @@ from can_handler import CANHandler
 def process_message(message):
     key, value = message
     print("Received message - Key:", hex(key), "Value:", value)
-    can_handler.send_can_message(KEY, 123)
+    can_handler.send_can_message(KEY, value)
 
 if __name__ == "__main__":
     CAN_ID = 0x123
