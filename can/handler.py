@@ -54,7 +54,9 @@ class CANHandler:
 
             response = (key, value)
 
-            if callback is not None:
-                callback(response)
+            callback(response)
 
-            return response
+            # if callback is not None:
+            #     callback(response)
+
+            # return response
