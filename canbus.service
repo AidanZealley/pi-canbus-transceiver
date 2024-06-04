@@ -7,7 +7,7 @@ ExecStart=/home/USERNAME/pi-canbus-transceiver/setup.sh
 WorkingDirectory=/home/USERNAME/pi-canbus-transceiver
 StandardOutput=inherit
 StandardError=inherit
-Restart=always
+Restart=on-failure
 User=USERNAME
 
 [Install]
