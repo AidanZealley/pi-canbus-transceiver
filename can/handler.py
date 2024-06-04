@@ -42,7 +42,7 @@ class CANHandler:
         
         return can_id, target_module, key, value
 
-    def receive_can_message(self, callback):
+    def receive_can_message(self, callback=None):
         while True:
             message = self.bus.recv()
             can_id, target_module, key, value = self.read_can_message(message)
@@ -52,4 +52,9 @@ class CANHandler:
             print("Key:", hex(key))
             print("Value:", value)
 
-            callback((key, value))
+            response = (key, value)
+
+            if callback is not None:
+                callback(response)
+
+            return response

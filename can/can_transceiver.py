@@ -1,4 +1,4 @@
-from can_handler import CANHandler
+from can.handler import CANHandler
 
 def process_message(message):
     key, value = message

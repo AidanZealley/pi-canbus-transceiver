@@ -27,4 +27,4 @@ pip install python-can
 
 # Run the Python receive script
 echo "Running tranceiver..."
-python can_transceiver.py
+python /can/can_transceiver.py

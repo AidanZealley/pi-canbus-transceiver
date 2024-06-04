@@ -1,19 +1,24 @@
 #!/usr/bin/python3
 
-from dasbus.connection import SessionMessageBus
-from dasbus.server.interface import dbus_interface, dbus_method, dbus_property, dbus_signal
-from dasbus.server.publishable import Publishable
-from gpiozero import CPUTemperature
+import dbus
+
+from can.handler import CANHandler
 
 from advertisement import Advertisement
 from service import Application, Service, Characteristic, Descriptor
+from gpiozero import CPUTemperature
 
 GATT_CHRC_IFACE = "org.bluez.GattCharacteristic1"
 NOTIFY_TIMEOUT = 5000
 
+CAN_ID = 0x123
+MODULE_ID = 0x12
+
+can_handler = CANHandler(can_id=CAN_ID, module_id=MODULE_ID)
+
 class ThermometerAdvertisement(Advertisement):
     def __init__(self, index):
-        super().__init__(index, "peripheral")
+        Advertisement.__init__(self, index, "peripheral")
         self.add_local_name("Thermometer")
         self.include_tx_power = True
 
@@ -21,38 +26,42 @@ class ThermometerService(Service):
     THERMOMETER_SVC_UUID = "00000001-710e-4a5b-8d75-3e5b444bc3cf"
 
     def __init__(self, index):
-        self.fahrenheit = True
-        super().__init__(index, self.THERMOMETER_SVC_UUID, True)
+        self.farenheit = True
+
+        Service.__init__(self, index, self.THERMOMETER_SVC_UUID, True)
         self.add_characteristic(TempCharacteristic(self))
         self.add_characteristic(UnitCharacteristic(self))
 
-    def is_fahrenheit(self):
-        return self.fahrenheit
+    def is_farenheit(self):
+        return self.farenheit
 
-    def set_fahrenheit(self, fahrenheit):
-        self.fahrenheit = fahrenheit
+    def set_farenheit(self, farenheit):
+        self.farenheit = farenheit
 
 class TempCharacteristic(Characteristic):
     TEMP_CHARACTERISTIC_UUID = "00000002-710e-4a5b-8d75-3e5b444bc3cf"
 
     def __init__(self, service):
         self.notifying = False
-        super().__init__(self.TEMP_CHARACTERISTIC_UUID, ["notify", "read"], service)
+
+        Characteristic.__init__(
+                self, self.TEMP_CHARACTERISTIC_UUID,
+                ["notify", "read"], service)
         self.add_descriptor(TempDescriptor(self))
 
     def get_temperature(self):
         value = []
         unit = "C"
 
-        cpu = CPUTemperature()
-        temp = cpu.temperature
-        if self.service.is_fahrenheit():
-            temp = (temp * 1.8) + 32
+        _, value = can_handler.receive_can_message()
+
+        temp = value
+        if self.service.is_farenheit():
             unit = "F"
 
         strtemp = str(round(temp, 1)) + " " + unit
         for c in strtemp:
-            value.append(ord(c))
+            value.append(dbus.Byte(c.encode()))
 
         return value
 
@@ -60,6 +69,7 @@ class TempCharacteristic(Characteristic):
         if self.notifying:
             value = self.get_temperature()
             self.PropertiesChanged(GATT_CHRC_IFACE, {"Value": value}, [])
+
         return self.notifying
 
     def StartNotify(self):
@@ -67,6 +77,7 @@ class TempCharacteristic(Characteristic):
             return
 
         self.notifying = True
+
         value = self.get_temperature()
         self.PropertiesChanged(GATT_CHRC_IFACE, {"Value": value}, [])
         self.add_timeout(NOTIFY_TIMEOUT, self.set_temperature_callback)
@@ -75,21 +86,26 @@ class TempCharacteristic(Characteristic):
         self.notifying = False
 
     def ReadValue(self, options):
-        return self.get_temperature()
+        value = self.get_temperature()
+
+        return value
 
 class TempDescriptor(Descriptor):
     TEMP_DESCRIPTOR_UUID = "2901"
     TEMP_DESCRIPTOR_VALUE = "CPU Temperature"
 
     def __init__(self, characteristic):
-        super().__init__(self.TEMP_DESCRIPTOR_UUID, ["read"], characteristic)
+        Descriptor.__init__(
+                self, self.TEMP_DESCRIPTOR_UUID,
+                ["read"],
+                characteristic)
 
     def ReadValue(self, options):
         value = []
         desc = self.TEMP_DESCRIPTOR_VALUE
 
         for c in desc:
-            value.append(ord(c))
+            value.append(dbus.Byte(c.encode()))
 
         return value
 
@@ -97,20 +113,25 @@ class UnitCharacteristic(Characteristic):
     UNIT_CHARACTERISTIC_UUID = "00000003-710e-4a5b-8d75-3e5b444bc3cf"
 
     def __init__(self, service):
-        super().__init__(self.UNIT_CHARACTERISTIC_UUID, ["read", "write"], service)
+        Characteristic.__init__(
+                self, self.UNIT_CHARACTERISTIC_UUID,
+                ["read", "write"], service)
         self.add_descriptor(UnitDescriptor(self))
 
     def WriteValue(self, value, options):
-        val = chr(value[0]).upper()
+        val = str(value[0]).upper()
         if val == "C":
-            self.service.set_fahrenheit(False)
+            self.service.set_farenheit(False)
         elif val == "F":
-            self.service.set_fahrenheit(True)
+            self.service.set_farenheit(True)
 
     def ReadValue(self, options):
         value = []
-        val = "F" if self.service.is_fahrenheit() else "C"
-        value.append(ord(val))
+
+        if self.service.is_farenheit(): val = "F"
+        else: val = "C"
+        value.append(dbus.Byte(val.encode()))
+
         return value
 
 class UnitDescriptor(Descriptor):
@@ -118,26 +139,28 @@ class UnitDescriptor(Descriptor):
     UNIT_DESCRIPTOR_VALUE = "Temperature Units (F or C)"
 
     def __init__(self, characteristic):
-        super().__init__(self.UNIT_DESCRIPTOR_UUID, ["read"], characteristic)
+        Descriptor.__init__(
+                self, self.UNIT_DESCRIPTOR_UUID,
+                ["read"],
+                characteristic)
 
     def ReadValue(self, options):
         value = []
         desc = self.UNIT_DESCRIPTOR_VALUE
 
         for c in desc:
-            value.append(ord(c))
+            value.append(dbus.Byte(c.encode()))
 
         return value
 
-if __name__ == "__main__":
-    app = Application()
-    app.add_service(ThermometerService(0))
-    app.register()
+app = Application()
+app.add_service(ThermometerService(0))
+app.register()
 
-    adv = ThermometerAdvertisement(0)
-    adv.register()
+adv = ThermometerAdvertisement(0)
+adv.register()
 
-    try:
-        app.run()
-    except KeyboardInterrupt:
-        app.quit()
+try:
+    app.run()
+except KeyboardInterrupt:
+    app.quit()
