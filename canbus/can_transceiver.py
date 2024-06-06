@@ -13,7 +13,7 @@ def main():
     MODULE_ID = 0x12
 
     can_handler = CANHandler(can_id=CAN_ID, module_id=MODULE_ID)
-    subscriber = CANMessageSubscriber()
+    subscriber = CANMessageSubscriber(can_handler)
 
     can_handler.add_subscriber(subscriber)
     can_handler.receive_can_message()
