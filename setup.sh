@@ -9,7 +9,7 @@ sudo ip link set can0 type can bitrate 100000
 sudo ip link set can0 up
 
 # Navigate to the directory where your Python script is located
-cd /pi-canbus-tranceiver
+cd /home/bmw130/pi-canbus-transceiver
 
 # Check the virtual environment exists
 if [ ! -d "$VENV_PATH" ]; then
@@ -27,4 +27,4 @@ pip install python-can
 
 # Run the Python receive script
 echo "Running tranceiver..."
-python canbus/can_transceiver.py
+python -m canbus.can_transceiver
