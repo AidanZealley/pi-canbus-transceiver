@@ -31,10 +31,14 @@ class CountCharacteristic(Characteristic):
 
     async def StartNotify(self):
         if self.notifying:
-            return
+            return False
+        
         self.notifying = True
+
         await self.service.can_handler.add_subscriber(self)
         await self.notify()
+
+        return True
 
     async def StopNotify(self):
         if not self.notifying:
