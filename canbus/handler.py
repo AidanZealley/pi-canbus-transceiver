@@ -1,5 +1,4 @@
 import can
-import asyncio
 
 class CANHandler:
     def __init__(self, interface='can0', bitrate=100000, can_id=None, module_id=None):
