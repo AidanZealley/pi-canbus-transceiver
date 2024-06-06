@@ -10,6 +10,7 @@ class CountAdvertisement(Advertisement):
     def __init__(self, index):
         Advertisement.__init__(self, index, "peripheral")
         self.add_local_name("Count")
+        self.include_tx_power = True
 
 class CountService(Service):
     COUNT_SVC_UUID = "00000001-710e-4a5b-8d75-3e5b444bc3cf"
@@ -24,7 +25,8 @@ class CountCharacteristic(Characteristic):
 
     def __init__(self, service):
         self.notifying = False
-        Characteristic.__init__(self, self.COUNT_CHARACTERISTIC_UUID, ["notify", "read"], service)
+
+        Characteristic.__init__(self, self.COUNT_CHARACTERISTIC_UUID, ["notify"], service)
         self.add_descriptor(CountDescriptor(self))
 
     def StartNotify(self):
@@ -51,10 +53,6 @@ class CountCharacteristic(Characteristic):
             self.PropertiesChanged(GATT_CHRC_IFACE, {"Value": [dbus.Byte(c) for c in count_value]}, [])
             self.add_timeout(NOTIFY_TIMEOUT, self.notify)
 
-    def ReadValue(self, options):
-        value = str(self.service.can_handler.get_count()).encode()
-        return [dbus.Byte(c) for c in value]
-
 class CountDescriptor(Descriptor):
     COUNT_DESCRIPTOR_UUID = "2901"
     COUNT_DESCRIPTOR_VALUE = "Count Value"
@@ -67,10 +65,9 @@ class CountDescriptor(Descriptor):
         return value
     
 def main():
-    can_handler = CANHandler()  # Initialize CAN handler
+    can_handler = CANHandler()
     app = Application()
-    service = CountService(0, can_handler)
-    app.add_service(service)
+    app.add_service(CountService(0, can_handler))
     app.register()
 
     adv = CountAdvertisement(0)
