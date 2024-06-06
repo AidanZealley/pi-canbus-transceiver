@@ -29,14 +29,14 @@ class CountCharacteristic(Characteristic):
         Characteristic.__init__(self, self.COUNT_CHARACTERISTIC_UUID, ["notify", "read"], service)
         self.add_descriptor(CountDescriptor(self))
 
-    async def StartNotify(self):
+    def StartNotify(self):
         if self.notifying:
             return False
         
         self.notifying = True
 
-        await self.service.can_handler.add_subscriber(self)
-        await self.notify()
+        self.service.can_handler.add_subscriber(self)
+        self.notify()
 
         return True
 
