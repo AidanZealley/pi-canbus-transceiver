@@ -1,8 +1,8 @@
-import can
+from can import Bus, Message
 
 class CANHandler:
     def __init__(self, interface='can0', bitrate=100000, can_id=None, module_id=None):
-        self.bus = can.interface.Bus(interface, bustype='socketcan', bitrate=bitrate)
+        self.bus = Bus(interface, bustype='socketcan', bitrate=bitrate)
         self.can_id = can_id
         self.module_id = module_id
 
@@ -29,7 +29,7 @@ class CANHandler:
         key_bytes = key.to_bytes(1, byteorder='big')
         value_bytes = value.to_bytes(4, byteorder='big')
         data = self.module_id.to_bytes(1, byteorder='big') + key_bytes + value_bytes
-        message = can.Message(arbitration_id=self.can_id, data=data, is_extended_id=False)
+        message = Message(arbitration_id=self.can_id, data=data, is_extended_id=False)
         
         self.bus.send(message)
 
@@ -42,7 +42,7 @@ class CANHandler:
         
         return can_id, target_module, key, value
 
-    def receive_can_message(self, callback=None):
+    def receive_can_message(self, callback):
         while True:
             message = self.bus.recv()
             can_id, target_module, key, value = self.read_can_message(message)
@@ -55,8 +55,3 @@ class CANHandler:
             response = (key, value)
 
             callback(response)
-
-            # if callback is not None:
-            #     callback(response)
-
-            # return response
