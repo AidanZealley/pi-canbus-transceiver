@@ -10,7 +10,6 @@ class CountAdvertisement(Advertisement):
     def __init__(self, index):
         Advertisement.__init__(self, index, "peripheral")
         self.add_local_name("Count")
-        self.include_tx_power = True
 
 class CountService(Service):
     COUNT_SVC_UUID = "00000001-710e-4a5b-8d75-3e5b444bc3cf"
