@@ -1,4 +1,3 @@
-import asyncio
 from canbus.handler import CANHandler
 
 class CANMessageSubscriber:
