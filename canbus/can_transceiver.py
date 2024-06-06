@@ -1,8 +1,12 @@
 from canbus.handler import CANHandler
 
 class CANMessageSubscriber:
+    def __init__(self, can_handler):
+        self.can_handler = can_handler
+
     def notify(self, count_value):
         print("Received message - Value:", count_value)
+        self.can_handler.send_can_message(0x01, count_value)
 
 def main():
     CAN_ID = 0x123

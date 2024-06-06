@@ -1,5 +1,4 @@
 import can
-import asyncio
 
 class CANHandler:
     def __init__(self, interface='can0', bitrate=100000, can_id=None, module_id=None):
@@ -38,7 +37,6 @@ class CANHandler:
         return can_id, target_module, key, value
 
     def receive_can_message(self):
-        loop = asyncio.get_event_loop()
         while True:
             message = self.bus.recv()
             can_id, target_module, key, value = self.read_can_message(message)
