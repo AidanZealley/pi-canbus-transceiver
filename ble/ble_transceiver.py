@@ -46,7 +46,7 @@ class CountCharacteristic(Characteristic):
         while self.notifying:
             count_value = str(value).encode()
 
-            await self.PropertiesChanged(GATT_CHRC_IFACE, {"Value": [dbus.Byte(c) for c in count_value]}, [])
+            self.PropertiesChanged(GATT_CHRC_IFACE, {"Value": [dbus.Byte(c) for c in count_value]}, [])
             await asyncio.sleep(1)
 
     def ReadValue(self, options):
