@@ -21,7 +21,7 @@ class CountService(Service):
         self.add_characteristic(CountCharacteristic(self))
 
 class CountCharacteristic(Characteristic):
-    COUNT_CHARACTERISTIC_UUID = "00000002-710e-4a5b-8d75-3e5b444bc3cf"
+    COUNT_CHARACTERISTIC_UUID = "00000004-710e-4a5b-8d75-3e5b444bc3cf"
 
     def __init__(self, service):
         self.notifying = False
