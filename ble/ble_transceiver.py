@@ -1,11 +1,10 @@
 import dbus
-import asyncio
 from ble.advertisement import Advertisement
 from ble.service import Application, Service, Characteristic, Descriptor
 from canbus.handler import CANHandler
 
 GATT_CHRC_IFACE = "org.bluez.GattCharacteristic1"
-NOTIFY_TIMEOUT = 5000
+NOTIFY_TIMEOUT = 1000
 
 class CountAdvertisement(Advertisement):
     def __init__(self, index):
@@ -51,7 +50,7 @@ class CountCharacteristic(Characteristic):
             count_value = str(value).encode()
             print(count_value)
             self.PropertiesChanged(GATT_CHRC_IFACE, {"Value": [dbus.Byte(c) for c in count_value]}, [])
-            asyncio.sleep(1)
+            self.add_timeout(NOTIFY_TIMEOUT, self.notify)
 
     def ReadValue(self, options):
         value = str(self.service.can_handler.get_count()).encode()
@@ -70,7 +69,7 @@ class CountDescriptor(Descriptor):
     
 def main():
     can_handler = CANHandler()  # Initialize CAN handler
-    app = Application
+    app = Application()
     service = CountService(0, can_handler)
     app.add_service(service)
     app.register()
@@ -79,10 +78,8 @@ def main():
     adv.register()
 
     try:
-        asyncio.gather(
-            app.run(),
-            can_handler.receive_can_message()
-        )
+        app.run()
+        can_handler.receive_can_message()
     except KeyboardInterrupt:
         app.quit()
 
