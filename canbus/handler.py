@@ -6,6 +6,7 @@ class CANHandler:
         self.bus = can.interface.Bus(interface, bustype='socketcan', bitrate=bitrate)
         self.can_id = can_id
         self.module_id = module_id
+        self.subscribers = set()
 
         if can_id is not None or module_id is not None:
             self.set_filters(can_id, module_id)
@@ -17,11 +18,6 @@ class CANHandler:
             filters.append({"can_id": can_id, "can_mask": 0x7FF, "extended": False})
 
         if module_id is not None:
-            # Assuming module_id is part of the CAN data payload and requires additional handling
-            # You could add more complex filtering here if needed
-            
-            # Example: filter on first byte of data payload being the module_id
-            # This is a simplistic filter assuming you can set data payload filters directly
             filters.append({"can_id": 0, "can_mask": 0, "extended": False, "data": [module_id]})
 
         self.bus.set_filters(filters)
@@ -31,7 +27,6 @@ class CANHandler:
         value_bytes = value.to_bytes(4, byteorder='big')
         data = self.module_id.to_bytes(1, byteorder='big') + key_bytes + value_bytes
         message = can.Message(arbitration_id=self.can_id, data=data, is_extended_id=False)
-        
         self.bus.send(message)
 
     def read_can_message(self, message):
@@ -40,20 +35,18 @@ class CANHandler:
         target_module = int.from_bytes(data[0:1], byteorder='big')
         key = int.from_bytes(data[1:2], byteorder='big')
         value = int.from_bytes(data[2:6], byteorder='big')
-        
         return can_id, target_module, key, value
 
-    async def receive_can_message(self, callback):
-        loop = asyncio.get_event_loop()
+    async def receive_can_message(self):
         while True:
-            message = await loop.run_in_executor(None, self.bus.recv)
+            message = await self.bus.recv()
             can_id, target_module, key, value = self.read_can_message(message)
 
-            print("CAN ID:", hex(can_id))
-            print("Target Module:", hex(target_module))
-            print("Key:", hex(key))
-            print("Value:", value)
+            for subscriber in self.subscribers:
+                await subscriber.notify(value)
 
-            response = (key, value)
+    async def add_subscriber(self, subscriber):
+        self.subscribers.add(subscriber)
 
-            await callback(response)
+    async def remove_subscriber(self, subscriber):
+        self.subscribers.remove(subscriber)
