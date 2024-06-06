@@ -1,8 +1,9 @@
-from can import Bus, Message
+import can
+import asyncio
 
 class CANHandler:
     def __init__(self, interface='can0', bitrate=100000, can_id=None, module_id=None):
-        self.bus = Bus(interface, bustype='socketcan', bitrate=bitrate)
+        self.bus = can.interface.Bus(interface, bustype='socketcan', bitrate=bitrate)
         self.can_id = can_id
         self.module_id = module_id
 
@@ -25,11 +26,11 @@ class CANHandler:
 
         self.bus.set_filters(filters)
 
-    def send_can_message(self, key, value):
+    async def send_can_message(self, key, value):
         key_bytes = key.to_bytes(1, byteorder='big')
         value_bytes = value.to_bytes(4, byteorder='big')
         data = self.module_id.to_bytes(1, byteorder='big') + key_bytes + value_bytes
-        message = Message(arbitration_id=self.can_id, data=data, is_extended_id=False)
+        message = can.Message(arbitration_id=self.can_id, data=data, is_extended_id=False)
         
         self.bus.send(message)
 
@@ -42,9 +43,10 @@ class CANHandler:
         
         return can_id, target_module, key, value
 
-    def receive_can_message(self, callback):
+    async def receive_can_message(self, callback):
+        loop = asyncio.get_event_loop()
         while True:
-            message = self.bus.recv()
+            message = await loop.run_in_executor(None, self.bus.recv)
             can_id, target_module, key, value = self.read_can_message(message)
 
             print("CAN ID:", hex(can_id))
@@ -54,4 +56,4 @@ class CANHandler:
 
             response = (key, value)
 
-            callback(response)
+            await callback(response)
