@@ -11,7 +11,7 @@ async def main():
 
     can_handler = CANHandler(can_id=CAN_ID, module_id=MODULE_ID)
     subscriber = CANMessageSubscriber()
-    can_handler.subscribe(subscriber)
+    can_handler.add_subscriber(subscriber)
 
     await can_handler.receive_can_message()
 
