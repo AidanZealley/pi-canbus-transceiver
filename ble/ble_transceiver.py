@@ -40,18 +40,18 @@ class CountCharacteristic(Characteristic):
 
         return True
 
-    async def StopNotify(self):
+    def StopNotify(self):
         if not self.notifying:
             return
         self.notifying = False
-        await self.service.can_handler.remove_subscriber(self)
+        self.service.can_handler.remove_subscriber(self)
 
-    async def notify(self, value):
+    def notify(self, value):
         while self.notifying:
             count_value = str(value).encode()
             print(count_value)
             self.PropertiesChanged(GATT_CHRC_IFACE, {"Value": [dbus.Byte(c) for c in count_value]}, [])
-            await asyncio.sleep(1)
+            asyncio.sleep(1)
 
     def ReadValue(self, options):
         value = str(self.service.can_handler.get_count()).encode()
@@ -68,9 +68,9 @@ class CountDescriptor(Descriptor):
         value = [dbus.Byte(c.encode()) for c in self.COUNT_DESCRIPTOR_VALUE]
         return value
     
-async def main():
+def main():
     can_handler = CANHandler()  # Initialize CAN handler
-    app = Application()
+    app = Application
     service = CountService(0, can_handler)
     app.add_service(service)
     app.register()
@@ -79,7 +79,7 @@ async def main():
     adv.register()
 
     try:
-        await asyncio.gather(
+        asyncio.gather(
             app.run(),
             can_handler.receive_can_message()
         )
@@ -87,4 +87,4 @@ async def main():
         app.quit()
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    main()

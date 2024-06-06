@@ -22,7 +22,7 @@ class CANHandler:
 
         self.bus.set_filters(filters)
 
-    async def send_can_message(self, key, value):
+    def send_can_message(self, key, value):
         key_bytes = key.to_bytes(1, byteorder='big')
         value_bytes = value.to_bytes(4, byteorder='big')
         data = self.module_id.to_bytes(1, byteorder='big') + key_bytes + value_bytes
@@ -37,17 +37,17 @@ class CANHandler:
         value = int.from_bytes(data[2:6], byteorder='big')
         return can_id, target_module, key, value
 
-    async def receive_can_message(self):
+    def receive_can_message(self):
         loop = asyncio.get_event_loop()
         while True:
-            message = await loop.run_in_executor(None, self.bus.recv)
+            message = self.bus.recv()
             can_id, target_module, key, value = self.read_can_message(message)
 
             for subscriber in self.subscribers:
-                await subscriber.notify(value)
+                subscriber.notify(value)
 
-    async def add_subscriber(self, subscriber):
+    def add_subscriber(self, subscriber):
         self.subscribers.add(subscriber)
 
-    async def remove_subscriber(self, subscriber):
+    def remove_subscriber(self, subscriber):
         self.subscribers.remove(subscriber)
