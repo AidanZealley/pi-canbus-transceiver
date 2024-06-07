@@ -70,6 +70,8 @@ class CountDescriptor(Descriptor):
     
 def main():
     can_handler = CANHandler()
+    can_handler.receive_can_message()
+
     app = Application()
     app.add_service(CountService(0, can_handler))
     app.register()
@@ -79,7 +81,6 @@ def main():
 
     try:
         app.run()
-        can_handler.receive_can_message()
     except KeyboardInterrupt:
         app.quit()
         can_handler.stop()
