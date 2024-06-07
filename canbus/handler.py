@@ -1,5 +1,7 @@
 import can
-import threading
+import asyncio
+
+NOTIFY_TIMEOUT = 1000
 
 class CANHandler:
     def __init__(self, interface='can0', bitrate=100000, can_id=None, module_id=None):
@@ -38,38 +40,29 @@ class CANHandler:
         value = int.from_bytes(data[2:6], byteorder='big')
         return can_id, target_module, key, value
 
-    def receive_can_message(self):
+    async def receive_can_message(self):
         print("Starting CAN message receiving loop.")
-        self._stop_flag = False  # Ensure the stop flag is reset when starting
-        def receive_loop():
-            while not self._stop_flag:
-                try:
-                    message = self.bus.recv()  # Timeout of 1 second
-                    if message:
-                        can_id, target_module, key, value = self.read_can_message(message)
-                        print(f"Received CAN message: can_id={can_id}, target_module={target_module}, key={key}, value={value}")
-                        for subscriber in self.subscribers:
-                            print(subscriber)
-                            subscriber.notify(value)
-                    else:
-                        print("No CAN message received within timeout period.")
-                except Exception as e:
-                    print(f"Error receiving CAN message: {e}")
-            print("Stopping CAN message receiving loop.")
-        
-        # Create and start the thread
-        receive_thread = threading.Thread(target=receive_loop)
-        receive_thread.start()
-        self.receive_thread = receive_thread
+        while True:
+            try:
+                message = await self.bus.recv()
+                if message:
+                    can_id, target_module, key, value = self.read_can_message(message)
+                    print(f"Received CAN message: can_id={can_id}, target_module={target_module}, key={key}, value={value}")
+                    for subscriber in self.subscribers:
+                        subscriber.notify(value)
+                else:
+                    print("No CAN message received within timeout period.")
+            except Exception as e:
+                print(f"Error receiving CAN message: {e}")
 
     def add_subscriber(self, subscriber):
+        # start
         print("New subscriber")
         self.subscribers.add(subscriber)
 
     def remove_subscriber(self, subscriber):
+        # stop if sub list empty
         self.subscribers.remove(subscriber)
 
     def stop(self):
         self._stop_flag = True
-        if hasattr(self, 'receive_thread'):
-            self.receive_thread.join()

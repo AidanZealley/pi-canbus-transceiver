@@ -1,5 +1,6 @@
 import dbus
 import time
+import asyncio
 
 from ble.advertisement import Advertisement
 from ble.service import Application, Service, Characteristic, Descriptor
@@ -67,9 +68,9 @@ class CountDescriptor(Descriptor):
         value = [dbus.Byte(c.encode()) for c in self.COUNT_DESCRIPTOR_VALUE]
         return value
     
-def main():
+async def main():
     can_handler = CANHandler()
-    can_handler.receive_can_message()
+    await can_handler.receive_can_message()
 
     app = Application()
     app.add_service(CountService(0, can_handler))
