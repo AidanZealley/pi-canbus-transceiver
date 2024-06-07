@@ -1,4 +1,5 @@
 import can
+import time
 
 NOTIFY_TIMEOUT = 1000
 
@@ -8,6 +9,7 @@ class CANHandler:
         self.can_id = can_id
         self.module_id = module_id
         self.subscribers = set()
+        self._stop_flag = False
 
         if can_id is not None or module_id is not None:
             self.set_filters(can_id, module_id)
@@ -39,14 +41,12 @@ class CANHandler:
         return can_id, target_module, key, value
 
     def receive_can_message(self):
-        while True:
+        while not self._stop_flag:
             message = self.bus.recv()
-            can_id, target_module, key, value = self.read_can_message(message)
-
-            for subscriber in self.subscribers:
-                subscriber.notify(value)
-
-            self.add_timeout(NOTIFY_TIMEOUT, self.receive_can_message)
+            if message:
+                for subscriber in self.subscribers:
+                    subscriber.notify(message)
+            time.sleep(1)
 
     def add_subscriber(self, subscriber):
         print("New subscriber")
@@ -54,3 +54,6 @@ class CANHandler:
 
     def remove_subscriber(self, subscriber):
         self.subscribers.remove(subscriber)
+
+    def stop(self):
+        self._stop_flag = True

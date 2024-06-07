@@ -1,4 +1,6 @@
 import dbus
+import threading
+
 from ble.advertisement import Advertisement
 from ble.service import Application, Service, Characteristic, Descriptor
 from canbus.handler import CANHandler
@@ -36,7 +38,7 @@ class CountCharacteristic(Characteristic):
         self.notifying = True
 
         self.service.can_handler.add_subscriber(self)
-        # self.service.can_handler.receive_can_message()
+        self.service.can_handler.receive_can_message()
 
         return True
 
@@ -46,9 +48,11 @@ class CountCharacteristic(Characteristic):
         self.notifying = False
         self.service.can_handler.remove_subscriber(self)
 
-    def notify(self, value):
+    def notify(self, message):
         while self.notifying:
+            can_id, target_module, key, value = self.service.can_handler.read_can_message(message)
             count_value = str(value).encode()
+
             print("COUNT: ", count_value)
             self.PropertiesChanged(GATT_CHRC_IFACE, {"Value": [dbus.Byte(c) for c in count_value]}, [])
             self.add_timeout(NOTIFY_TIMEOUT, self.notify)
@@ -73,11 +77,15 @@ def main():
     adv = CountAdvertisement(0)
     adv.register()
 
+    can_thread = threading.Thread(target=can_handler.receive_can_message, daemon=True)
+    can_thread.start()
+
     try:
         app.run()
-        can_handler.receive_can_message()
     except KeyboardInterrupt:
         app.quit()
+        can_handler.stop()
+        can_thread.join()
 
 if __name__ == "__main__":
     main()
