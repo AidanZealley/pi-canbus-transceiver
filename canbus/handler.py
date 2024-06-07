@@ -43,17 +43,19 @@ class CANHandler:
 
     def receive_can_message(self):
         print("Starting CAN message receiving loop.")
-
-        while True:
-            message = self.bus.recv()
-
-            if message:
-                can_id, target_module, key, value = self.read_can_message(message)
-                print(f"Received CAN message: can_id={can_id}, target_module={target_module}, key={key}, value={value}")
-                for subscriber in self.subscribers:
-                    subscriber.notify(value)
-            else:
-                print("No CAN message received.")
+        while not self._stop_flag.is_set():
+            try:
+                message = self.bus.recv(1)  # Timeout of 1 second
+                if message:
+                    can_id, target_module, key, value = self.read_can_message(message)
+                    print(f"Received CAN message: can_id={can_id}, target_module={target_module}, key={key}, value={value}")
+                    for subscriber in self.subscribers:
+                        subscriber.notify(value)
+                else:
+                    print("No CAN message received within timeout period.")
+            except Exception as e:
+                logging.error(f"Error receiving CAN message: {e}")
+            time.sleep(1)
 
     def add_subscriber(self, subscriber):
         # start
