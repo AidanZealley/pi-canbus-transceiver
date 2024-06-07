@@ -49,7 +49,7 @@ class CountCharacteristic(Characteristic):
     def notify(self, value):
         while self.notifying:
             count_value = str(value).encode()
-            print(count_value)
+            print("COUNT: ", count_value)
             self.PropertiesChanged(GATT_CHRC_IFACE, {"Value": [dbus.Byte(c) for c in count_value]}, [])
             self.add_timeout(NOTIFY_TIMEOUT, self.notify)
 
