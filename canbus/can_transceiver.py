@@ -6,7 +6,7 @@ class CANMessageSubscriber:
 
     def notify(self, count_value):
         print("Received message - Value:", count_value)
-        self.can_handler.send_can_message(0x01, count_value)
+        # self.can_handler.send_can_message(0x01, count_value)
 
 def main():
     CAN_ID = 0x123
