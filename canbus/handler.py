@@ -46,7 +46,7 @@ class CANHandler:
             for subscriber in self.subscribers:
                 subscriber.notify(value)
 
-            self.add_timeout(NOTIFY_TIMEOUT, self.notify)
+            self.add_timeout(NOTIFY_TIMEOUT, self.receive_can_message)
 
     def add_subscriber(self, subscriber):
         print("New subscriber")
