@@ -36,6 +36,7 @@ class CountCharacteristic(Characteristic):
         self.notifying = True
 
         self.service.can_handler.add_subscriber(self)
+        self.service.can_handler.receive_can_message()
 
         return True
 
@@ -74,7 +75,6 @@ def main():
 
     try:
         app.run()
-        can_handler.receive_can_message()
     except KeyboardInterrupt:
         app.quit()
 
