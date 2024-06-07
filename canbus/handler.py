@@ -55,7 +55,6 @@ class CANHandler:
                     print("No CAN message received within timeout period.")
             except Exception as e:
                 logging.error(f"Error receiving CAN message: {e}")
-            time.sleep(1)
 
     def add_subscriber(self, subscriber):
         # start
