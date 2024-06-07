@@ -49,14 +49,14 @@ class CountCharacteristic(Characteristic):
         self.notifying = False
         self.service.can_handler.remove_subscriber(self)
 
-    def notify(self, value):
+    async def notify(self, value):
         while self.notifying:
             count_value = str(value).encode()
 
             print("COUNT: ", count_value)
-            self.PropertiesChanged(GATT_CHRC_IFACE, {"Value": [dbus.Byte(c) for c in count_value]}, [])
+            self.PropertiesChanged("org.bluez.GattCharacteristic1", {"Value": [dbus.Byte(c) for c in count_value]}, [])
             
-            time.sleep(1)
+            await asyncio.sleep(1)
 
 class CountDescriptor(Descriptor):
     COUNT_DESCRIPTOR_UUID = "2901"
