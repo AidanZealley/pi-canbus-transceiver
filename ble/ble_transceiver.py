@@ -1,5 +1,6 @@
 import dbus
 import threading
+import time
 
 from ble.advertisement import Advertisement
 from ble.service import Application, Service, Characteristic, Descriptor
@@ -55,7 +56,8 @@ class CountCharacteristic(Characteristic):
 
             print("COUNT: ", count_value)
             self.PropertiesChanged(GATT_CHRC_IFACE, {"Value": [dbus.Byte(c) for c in count_value]}, [])
-            self.add_timeout(NOTIFY_TIMEOUT, self.notify)
+            
+            time.sleep(1)
 
 class CountDescriptor(Descriptor):
     COUNT_DESCRIPTOR_UUID = "2901"
