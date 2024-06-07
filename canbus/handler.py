@@ -45,7 +45,7 @@ class CANHandler:
         print("Starting CAN message receiving loop.")
 
         while not self._stop_flag:
-            message = self.bus.recv(1)
+            message = self.bus.recv()
 
             if message:
                 can_id, target_module, key, value = self.read_can_message(message)
@@ -54,8 +54,6 @@ class CANHandler:
                     subscriber.notify(value)
             else:
                 print("No CAN message received.")
-
-            time.sleep(1)
 
     def add_subscriber(self, subscriber):
         # start
