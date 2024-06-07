@@ -41,6 +41,8 @@ class CANHandler:
             message = self.bus.recv()
             can_id, target_module, key, value = self.read_can_message(message)
 
+            print(can_id, target_module, key, value)
+
             for subscriber in self.subscribers:
                 subscriber.notify(value)
 
