@@ -51,6 +51,7 @@ class CANHandler:
                     print(f"Received CAN message: can_id={can_id}, target_module={target_module}, key={key}, value={value}")
                     for subscriber in self.subscribers:
                         subscriber.notify(value)
+                    time.sleep(1)
                 else:
                     print("No CAN message received within timeout period.")
             except Exception as e:
