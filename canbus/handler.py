@@ -54,12 +54,12 @@ class CANHandler:
                     subscriber.notify(value)
             else:
                 logging.info("No CAN message received.")
-                
+
             time.sleep(1)
 
     def add_subscriber(self, subscriber):
         # start
-        print("New subscriber")
+        logging.info("New subscriber")
         self.subscribers.add(subscriber)
 
     def remove_subscriber(self, subscriber):
