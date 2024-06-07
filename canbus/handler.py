@@ -43,7 +43,7 @@ class CANHandler:
 
     def receive_can_message(self):
         print("Starting CAN message receiving loop.")
-        while not self._stop_flag.is_set():
+        while True:
             try:
                 message = self.bus.recv(1)  # Timeout of 1 second
                 if message:
