@@ -42,24 +42,24 @@ class CANHandler:
         return can_id, target_module, key, value
 
     def receive_can_message(self):
-        logging.info("Starting CAN message receiving loop.")
+        print("Starting CAN message receiving loop.")
 
         while not self._stop_flag:
             message = self.bus.recv(1)
 
             if message:
                 can_id, target_module, key, value = self.read_can_message(message)
-                logging.info(f"Received CAN message: can_id={can_id}, target_module={target_module}, key={key}, value={value}")
+                print(f"Received CAN message: can_id={can_id}, target_module={target_module}, key={key}, value={value}")
                 for subscriber in self.subscribers:
                     subscriber.notify(value)
             else:
-                logging.info("No CAN message received.")
+                print("No CAN message received.")
 
             time.sleep(1)
 
     def add_subscriber(self, subscriber):
         # start
-        logging.info("New subscriber")
+        print("New subscriber")
         self.subscribers.add(subscriber)
 
     def remove_subscriber(self, subscriber):
