@@ -36,7 +36,6 @@ class CountCharacteristic(Characteristic):
         self.notifying = True
 
         self.service.can_handler.add_subscriber(self)
-        self.notify()
 
         return True
 

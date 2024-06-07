@@ -45,6 +45,7 @@ class CANHandler:
                 subscriber.notify(value)
 
     def add_subscriber(self, subscriber):
+        print("New subscriber")
         self.subscribers.add(subscriber)
 
     def remove_subscriber(self, subscriber):
