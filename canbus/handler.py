@@ -43,16 +43,20 @@ class CANHandler:
     def receive_can_message(self):
         while not self._stop_flag:
             message = self.bus.recv()
-            if message:
-                for subscriber in self.subscribers:
-                    subscriber.notify(message)
+            can_id, target_module, key, value = self.read_can_message(message)
+
+            for subscriber in self.subscribers:
+                subscriber.notify(value)
+
             time.sleep(1)
 
     def add_subscriber(self, subscriber):
+        # start
         print("New subscriber")
         self.subscribers.add(subscriber)
 
     def remove_subscriber(self, subscriber):
+        # stop if sub list empty
         self.subscribers.remove(subscriber)
 
     def stop(self):

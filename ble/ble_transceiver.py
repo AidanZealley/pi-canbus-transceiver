@@ -49,9 +49,8 @@ class CountCharacteristic(Characteristic):
         self.notifying = False
         self.service.can_handler.remove_subscriber(self)
 
-    def notify(self, message):
+    def notify(self, value):
         while self.notifying:
-            can_id, target_module, key, value = self.service.can_handler.read_can_message(message)
             count_value = str(value).encode()
 
             print("COUNT: ", count_value)
