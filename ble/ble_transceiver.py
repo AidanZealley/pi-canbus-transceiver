@@ -1,5 +1,4 @@
 import dbus
-import threading
 import time
 
 from ble.advertisement import Advertisement
@@ -78,15 +77,12 @@ def main():
     adv = CountAdvertisement(0)
     adv.register()
 
-    can_thread = threading.Thread(target=can_handler.receive_can_message, daemon=True)
-    can_thread.start()
-
     try:
         app.run()
+        can_handler.receive_can_message()
     except KeyboardInterrupt:
         app.quit()
         can_handler.stop()
-        can_thread.join()
 
 if __name__ == "__main__":
     main()

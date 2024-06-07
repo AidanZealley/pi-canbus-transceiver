@@ -1,5 +1,6 @@
 import can
 import time
+import logging
 
 NOTIFY_TIMEOUT = 1000
 
@@ -41,13 +42,19 @@ class CANHandler:
         return can_id, target_module, key, value
 
     def receive_can_message(self):
-        while not self._stop_flag:
-            message = self.bus.recv()
-            can_id, target_module, key, value = self.read_can_message(message)
-            print(value)
-            for subscriber in self.subscribers:
-                subscriber.notify(value)
+        logging.info("Starting CAN message receiving loop.")
 
+        while not self._stop_flag:
+            message = self.bus.recv(1)
+
+            if message:
+                can_id, target_module, key, value = self.read_can_message(message)
+                logging.info(f"Received CAN message: can_id={can_id}, target_module={target_module}, key={key}, value={value}")
+                for subscriber in self.subscribers:
+                    subscriber.notify(value)
+            else:
+                logging.info("No CAN message received.")
+                
             time.sleep(1)
 
     def add_subscriber(self, subscriber):
