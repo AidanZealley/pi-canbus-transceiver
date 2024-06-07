@@ -39,7 +39,6 @@ class CountCharacteristic(Characteristic):
         self.notifying = True
 
         self.service.can_handler.add_subscriber(self)
-        asyncio.create_task(self.service.can_handler.receive_can_message())
 
         return True
 
@@ -71,6 +70,7 @@ class CountDescriptor(Descriptor):
     
 async def main():
     can_handler = CANHandler()
+    await can_handler.receive_can_message()
 
     app = Application()
     app.add_service(CountService(0, can_handler))
