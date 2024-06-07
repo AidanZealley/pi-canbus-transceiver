@@ -38,6 +38,8 @@ class CountCharacteristic(Characteristic):
         self.notifying = True
 
         self.service.can_handler.add_subscriber(self)
+        self.service.can_handler.receive_can_message()
+
 
         return True
 
@@ -69,7 +71,6 @@ class CountDescriptor(Descriptor):
     
 def main():
     can_handler = CANHandler()
-    can_handler.receive_can_message()
 
     app = Application()
     app.add_service(CountService(0, can_handler))

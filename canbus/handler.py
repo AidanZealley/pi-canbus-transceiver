@@ -1,8 +1,6 @@
 import can
 import threading
 
-NOTIFY_TIMEOUT = 1000
-
 class CANHandler:
     def __init__(self, interface='can0', bitrate=100000, can_id=None, module_id=None):
         self.bus = can.interface.Bus(interface, bustype='socketcan', bitrate=bitrate)
