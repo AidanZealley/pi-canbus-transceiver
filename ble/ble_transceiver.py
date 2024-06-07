@@ -86,4 +86,4 @@ async def main():
         can_handler.stop()
 
 if __name__ == "__main__":
-    asyncio(main())
+    asyncio.run(main())
