@@ -1,5 +1,7 @@
 import can
 
+NOTIFY_TIMEOUT = 1000
+
 class CANHandler:
     def __init__(self, interface='can0', bitrate=100000, can_id=None, module_id=None):
         self.bus = can.interface.Bus(interface, bustype='socketcan', bitrate=bitrate)
@@ -43,6 +45,8 @@ class CANHandler:
 
             for subscriber in self.subscribers:
                 subscriber.notify(value)
+
+            self.add_timeout(NOTIFY_TIMEOUT, self.notify)
 
     def add_subscriber(self, subscriber):
         print("New subscriber")
