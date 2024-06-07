@@ -44,7 +44,8 @@ class CANHandler:
         print("Starting CAN message receiving loop.")
         while True:
             try:
-                message = await self.bus.recv()
+                # Run the blocking recv call in a separate thread
+                message = await asyncio.to_thread(self.bus.recv, timeout=1)
                 if message:
                     can_id, target_module, key, value = self.read_can_message(message)
                     print(f"Received CAN message: can_id={can_id}, target_module={target_module}, key={key}, value={value}")
