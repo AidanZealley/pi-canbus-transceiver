@@ -45,7 +45,7 @@ class CANHandler:
         print("Starting CAN message receiving loop.")
         while True:
             try:
-                message = self.bus.recv(1)  # Timeout of 1 second
+                message = self.bus.recv()  # Timeout of 1 second
                 if message:
                     can_id, target_module, key, value = self.read_can_message(message)
                     print(f"Received CAN message: can_id={can_id}, target_module={target_module}, key={key}, value={value}")
